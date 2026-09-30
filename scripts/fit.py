@@ -34,8 +34,8 @@ def sysctl(name):
 
 
 def self_test():
-    # Measured anchor (apple-inference-perf/references/memory-budget.md, 2026-09-27):
-    # Qwen3.8-27B, 16 attention layers x 2 x 4 KV heads x 256 x bf16 = 64.0 KiB/token.
+    # Dense GQA anchor: 16 attention layers x (K+V) x 4 KV heads x 256 head_dim x bf16
+    # = 64.0 KiB/token, the size a live MLX server reported for such a model.
     assert kv_per_token(16, 4, 256, 2) == 64 * 1024
     kv, need, room = budget(90 * GiB, 64 * 1024, 262144, 1, 0, 3 * GiB, 24 * GiB, 4 * GiB, 128 * GiB)
     assert kv == 16 * GiB and need == 109 * GiB and room == 100 * GiB
@@ -58,7 +58,7 @@ def main():
     a.add_argument("--kv-bytes-per-token", type=float, help="overrides the dense formula (MLA/hybrid/SWA)")
     a.add_argument("--state-gib", type=float, default=0, help="fixed recurrent state per sequence")
     a.add_argument("--runtime-gib", type=float, default=3, help="prefill transient + buffers; measure and replace")
-    a.add_argument("--others-gib", type=float, default=24, help="wired + anonymous of everything else; envelope.sh")
+    a.add_argument("--others-gib", type=float, default=24, help="wired + anonymous + compressed of everything else (envelope.sh)")
     a.add_argument("--headroom-gib", type=float, default=4)
     a.add_argument("--self-test", action="store_true")
     o = a.parse_args()
@@ -93,7 +93,7 @@ def main():
     if wl and weights + kv > wl:
         print(f"WIRED LIMIT weights+kv {g(weights + kv)} > iogpu.wired_limit_mb {g(wl)}")
     if kv_tok and room > weights + o.runtime_gib * GiB:
-        print(f"max ctx     {int((room - weights - o.runtime_gib * GiB - o.state_gib * GiB * o.seqs) / kv_tok / o.seqs)} tokens/seq at this KV dtype")
+        print(f"mem max ctx {int((room - weights - o.runtime_gib * GiB - o.state_gib * GiB * o.seqs) / kv_tok / o.seqs)} tokens/seq at this KV dtype (memory only; model max may be lower)")
     verdict = "FIT" if need <= room * 0.95 else "TIGHT" if need <= room else "NO FIT"
     print(f"verdict     {verdict}")
     sys.exit(0 if verdict != "NO FIT" else 1)
