@@ -15,7 +15,10 @@ echo "wired_limit:   ${wl} MB$( [ "$wl" = 0 ] && echo ' (system default)')"
 w=$(vmv 'Pages wired down'); an=$(vmv 'Anonymous pages'); c=$(vmv 'Pages occupied by compressor')
 echo "wired_now:     $(gib "$w") GiB"
 echo "anonymous:     $(gib "$an") GiB   compressed: $(gib "$c") GiB"
-echo "others_gib:    $(gib $((w + an + c)))  (wired+anonymous+compressed; pass to fit.py --others-gib when no model is loaded)"
+echo "others_gib:    $(gib $((w + an + c)))  (wired+anonymous+compressed, incl. any model left running; fit.py measures this itself)"
+ga=$(ioreg -r -d 1 -w 0 -c IOAccelerator 2>/dev/null | grep -o '"Alloc system memory"=[0-9]*' | awk -F= '{s+=$2} END{print s+0}')
+echo "gpu_alloc:     $(gib "$ga") GiB  (GPU-held system memory; counts against wired_limit)"
+echo "gpu_procs:     $(ps -Ao pid=,command= | awk '{n=$2; sub(/.*\//,"",n)} n~/^(ds4|llama-|ollama|vllm|lms$)/ || /mlx_lm\.(server|generate)/ {printf "%s(%s) ", n, $1}')(a GPU holder need not listen on a port)"
 echo "free:          $(gib "$(vmv 'Pages free')") GiB"
 echo "swap:          $(sysctl -n vm.swapusage)"
 echo "swapouts:      $(vm_stat | awk -F: '/Swapouts/{gsub(/[ .]/,"",$2); print $2}') (cumulative; diff two samples)"

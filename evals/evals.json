@@ -30,6 +30,36 @@
       "should_trigger": true,
       "prompt": "Q2_K runs 40 tok/s and Q4_K_M 27 tok/s on my M4 Max, which should I use for coding?",
       "expected_output": "Compares quality delta (NLL or task evals vs a higher-precision reference), memory, context headroom, prefill and decode; explains the tradeoff instead of picking by speed."
+    },
+    {
+      "id": 6,
+      "should_trigger": true,
+      "prompt": "will Qwen3-235B-A22B Q3_K_M (split into 3 gguf files) fit on my 128 GB mac with 32k context?",
+      "expected_output": "Passes the first shard to fit.py so all shards are summed; uses resident (total) params for fit and active params only for the decode bound; reports the measured others and GPU-held memory; verdict names the overflowing term."
+    },
+    {
+      "id": 7,
+      "should_trigger": true,
+      "prompt": "serve Qwen3-Next 80B with 256k context for 4 parallel sessions on this M5 Max",
+      "expected_output": "Counts only attention layers in --layers, puts Gated DeltaNet recurrent + conv state in --state-gib (charged x4 sequences), checks the engine supports the architecture, and notes mlx_lm.server has no KV quantization flag."
+    },
+    {
+      "id": 8,
+      "should_trigger": true,
+      "prompt": "fit.py says FIT but the model hangs loading and swap grows — another model is already running",
+      "expected_output": "Reads gpu_alloc/gpu_procs from envelope.sh, compares GPU-held memory + need against iogpu.wired_limit_mb, and names the wired cap (not RAM) as the overflowing term before changing the model."
+    },
+    {
+      "id": 9,
+      "should_trigger": false,
+      "prompt": "write a fused int4 dequant + GEMV Metal kernel using M5 TensorOps and prove the speedup",
+      "expected_output": "Does not own it: custom Metal/TensorOps kernels and speedup proofs route to the kernel/A-B skill."
+    },
+    {
+      "id": 10,
+      "should_trigger": false,
+      "prompt": "tune decode speed of the GLM model my DS4 server is running",
+      "expected_output": "Does not own it: a runtime-specific skill for the DS4 server takes over."
     }
   ]
 }

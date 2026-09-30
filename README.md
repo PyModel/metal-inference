@@ -10,9 +10,9 @@ git clone https://github.com/PyModel/metal-inference.git ~/.claude/skills/metal-
 
 ## Scripts
 
-- `scripts/envelope.sh` — read-only snapshot: chip, RAM, wired limit, memory in use, swap, installed engines, busy ports. Safe while a server holds the GPU.
-- `scripts/fit.py` — memory budget and verdict. `fit.py --help`; `fit.py --self-test`.
+- `scripts/envelope.sh` — read-only snapshot: chip, RAM, wired limit, memory in use, GPU-held memory and its processes, swap, installed engines, busy ports. Safe while a server holds the GPU.
+- `scripts/fit.py` — memory budget and verdict against both RAM and the GPU wired cap; measures other processes itself. `fit.py --help`; `fit.py --self-test`.
 
 ```bash
-scripts/fit.py --gguf model.gguf --ctx 32768 --layers 48 --kv-heads 8 --head-dim 128 --others-gib 14
+scripts/fit.py --gguf model.gguf --ctx 32768 --layers 48 --kv-heads 8 --head-dim 128
 ```
