@@ -1,0 +1,10 @@
+{
+  "skill_name": "metal-inference",
+  "evals": [
+    {"id": 1, "should_trigger": true, "prompt": "can I run a 70B Q4_K_M gguf with 64k context on this mac alongside my usual apps?", "expected_output": "Runs envelope.sh and fit.py with real config numbers; states each budget term; names the dominant constraint (KV vs weights); gives a verdict and the falsifying measurement."},
+    {"id": 2, "should_trigger": true, "prompt": "my mlx model loads fine but only does 8 tok/s decode, what's wrong", "expected_output": "Walks the triage order (arm64, GPU, intended quant, prefill vs decode split, swapouts, bandwidth bound) before suggesting a smaller model."},
+    {"id": 3, "should_trigger": true, "prompt": "should I serve Qwen3-30B-A3B with llama.cpp or mlx_lm for 4 concurrent agents?", "expected_output": "Checks installed engines and versions, budgets KV x 4 sequences, compares batching support, gives launch commands verified against --help."},
+    {"id": 4, "should_trigger": false, "prompt": "the GLM ds4 server is slower at 200k context than last week, look into it", "expected_output": "Routes to ds4-local-llm-optimizer."},
+    {"id": 5, "should_trigger": false, "prompt": "I fused the router top-k into one Metal kernel, prove whether decode got faster", "expected_output": "Routes to apple-inference-perf (paired A/B, correctness vs reference)."}
+  ]
+}
