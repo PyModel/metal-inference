@@ -1,4 +1,6 @@
-# metal-inference
+![Metal Inference](assets/banner.svg)
+
+[![Agent Skill](assets/badge-skill.svg)](SKILL.md) [![Apple Silicon](assets/badge-platform.svg)](references/apple-silicon.md) [![Python 3](assets/badge-python.svg)](scripts/)
 
 An agent skill (Claude Code, and any harness that reads `SKILL.md`) for running local LLMs on Apple Silicon: whether a model/quant/context fits unified memory, which engine and quant to use, launch commands, and triage of slow or OOM-ing models.
 

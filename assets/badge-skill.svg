@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="26" viewBox="0 0 100 26" role="img" aria-label="Agent Skill">
+  <title>Agent Skill</title>
+  <rect x=".5" y=".5" width="99" height="25" rx="5" fill="#111c2e" stroke="#34435a"/>
+  <rect x="10" y="9" width="8" height="8" rx="2" fill="#8dbbff"/>
+  <text x="26" y="17" fill="#e7edf7" font-family="Inter, DejaVu Sans, Arial, sans-serif" font-size="11" font-weight="600">Agent Skill</text>
+</svg>

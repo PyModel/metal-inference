@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="320" viewBox="0 0 1280 320" role="img" aria-labelledby="title description">
+  <title id="title">Metal Inference</title>
+  <desc id="description">Metal Inference. An agent skill for model fit, memory budgets, and local serving on Apple Silicon.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#111d30"/>
+      <stop offset="1" stop-color="#070e1a"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.92" cy="0.15" r="0.9">
+      <stop offset="0" stop-color="#8dbbff" stop-opacity=".13"/>
+      <stop offset="1" stop-color="#8dbbff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#8dbbff"/>
+      <stop offset="1" stop-color="#a8a2ff"/>
+    </linearGradient>
+  </defs>
+  <rect x="1" y="1" width="1278" height="318" rx="20" fill="url(#background)" stroke="#2a384e"/>
+  <rect x="2" y="2" width="1276" height="316" rx="19" fill="url(#glow)"/>
+  <path d="M64 36H150" stroke="url(#accent)" stroke-width="3" stroke-linecap="round"/>
+  <g font-family="Inter, DejaVu Sans, Arial, sans-serif">
+    <text x="64" y="76" fill="#8dbbff" font-size="12" font-weight="700" letter-spacing="2.5">LOCAL INFERENCE / APPLE SILICON</text>
+    <text x="61" y="145" fill="#f7f9fd" font-size="49" font-weight="700" letter-spacing="-1.7">Metal Inference</text>
+    <text x="64" y="190" fill="#b9c7dc" font-size="18.5" font-weight="400">Fit, configure, and evaluate local models on Apple Silicon.</text>
+    <circle cx="69" cy="260" r="4" fill="#8dbbff"/>
+    <text x="85" y="264" fill="#8fa2bc" font-size="11.5" font-weight="600" letter-spacing="1.5">MODEL FIT · MEMORY BUDGETS · VERIFIED CAPABILITIES</text>
+  </g>
+  <path d="M914 56V264" stroke="#2a3a51" stroke-opacity=".8"/>
+  <g font-family="Inter, DejaVu Sans, Arial, sans-serif">
+    <g transform="translate(956 73)">
+      <rect width="260" height="45" rx="8" fill="#142236" fill-opacity=".82" stroke="#2d405b"/>
+      <rect x="17" y="16" width="3" height="13" rx="1.5" fill="#8dbbff" opacity="1"/>
+      <text x="35" y="28" fill="#dbe5f4" font-size="12" font-weight="600" letter-spacing="1.4">WEIGHTS</text>
+      <circle cx="236" cy="22.5" r="3" fill="#8dbbff" opacity=".5"/>
+    </g>
+    <g transform="translate(956 134)">
+      <rect width="260" height="45" rx="8" fill="#142236" fill-opacity=".82" stroke="#2d405b"/>
+      <rect x="17" y="16" width="3" height="13" rx="1.5" fill="#a8a2ff" opacity="1"/>
+      <text x="35" y="28" fill="#dbe5f4" font-size="12" font-weight="600" letter-spacing="1.4">KV / STATE</text>
+      <circle cx="236" cy="22.5" r="3" fill="#8dbbff" opacity=".5"/>
+    </g>
+    <g transform="translate(956 195)">
+      <rect width="260" height="45" rx="8" fill="#142236" fill-opacity=".82" stroke="#2d405b"/>
+      <rect x="17" y="16" width="3" height="13" rx="1.5" fill="#8dbbff" opacity=".6"/>
+      <text x="35" y="28" fill="#dbe5f4" font-size="12" font-weight="600" letter-spacing="1.4">HEADROOM</text>
+      <circle cx="236" cy="22.5" r="3" fill="#8dbbff" opacity=".5"/>
+    </g>
+  </g>
+</svg>
