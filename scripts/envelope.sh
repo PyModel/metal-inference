@@ -2,6 +2,10 @@
 # Read-only machine envelope for Apple Silicon LLM work. Never touches the GPU,
 # so it is safe while an inference server holds it.
 set -u
+if [ "$(uname -s)" != Darwin ]; then
+  echo 'unsupported platform: run this envelope on the target Mac' >&2
+  exit 2
+fi
 pg=$(pagesize 2>/dev/null || echo 16384)
 gib() { awk -v b="$1" 'BEGIN{printf "%.1f", b/1073741824}'; }
 vmv() { vm_stat | awk -v k="$1" -v pg="$pg" -F: '$1==k{gsub(/[ .]/,"",$2); print $2*pg}'; }
@@ -16,8 +20,12 @@ w=$(vmv 'Pages wired down'); an=$(vmv 'Anonymous pages'); c=$(vmv 'Pages occupie
 echo "wired_now:     $(gib "$w") GiB"
 echo "anonymous:     $(gib "$an") GiB   compressed: $(gib "$c") GiB"
 echo "others_gib:    $(gib $((w + an + c)))  (wired+anonymous+compressed, incl. any model left running; fit.py measures this itself)"
-ga=$(ioreg -r -d 1 -w 0 -c IOAccelerator 2>/dev/null | grep -o '"Alloc system memory"=[0-9]*' | awk -F= '{s+=$2} END{print s+0}')
-echo "gpu_alloc:     $(gib "$ga") GiB  (GPU-held system memory; counts against wired_limit)"
+ga=$(ioreg -r -d 1 -w 0 -c IOAccelerator 2>/dev/null | grep -o '"Alloc system memory"[[:space:]]*=[[:space:]]*[0-9]*' | awk -F= '{s+=$2; n++} END{if(n) print s; else print "unknown"}')
+if [ "$ga" = unknown ]; then
+  echo 'gpu_alloc:     unknown (counter unavailable; not zero)'
+else
+  echo "gpu_alloc:     $(gib "$ga") GiB  (GPU-held system memory; diagnostic allocation counter)"
+fi
 echo "gpu_procs:     $(ps -Ao pid=,command= | awk '{n=$2; sub(/.*\//,"",n)} n~/^(ds4|llama-|ollama|vllm|lms$)/ || /mlx_lm\.(server|generate)/ {printf "%s(%s) ", n, $1}')(a GPU holder need not listen on a port)"
 echo "free:          $(gib "$(vmv 'Pages free')") GiB"
 echo "swap:          $(sysctl -n vm.swapusage)"

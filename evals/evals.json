@@ -41,7 +41,7 @@
       "id": 7,
       "should_trigger": true,
       "prompt": "serve Qwen3-Next 80B with 256k context for 4 parallel sessions on this M5 Max",
-      "expected_output": "Counts only attention layers in --layers, puts Gated DeltaNet recurrent + conv state in --state-gib (charged x4 sequences), checks the engine supports the architecture, and notes mlx_lm.server has no KV quantization flag."
+      "expected_output": "Counts only attention layers in --layers, puts Gated DeltaNet recurrent + conv state in --state-gib (charged x4 sequences), checks the installed engine supports the architecture, and verifies whether server KV quant exists. For the checked MLX implementation, explains that quantized KV disables batching and unfused prefill can increase peak memory."
     },
     {
       "id": 8,
@@ -60,6 +60,30 @@
       "should_trigger": false,
       "prompt": "tune decode speed of the GLM model my DS4 server is running",
       "expected_output": "Does not own it: a runtime-specific skill for the DS4 server takes over."
+    },
+    {
+      "id": 11,
+      "should_trigger": true,
+      "prompt": "I have 4 agents using mlx_lm.server. Add --kv-bits 4 so all four can run with 128k context.",
+      "expected_output": "Checks installed server help/source, explains the checked KV-quant batching exclusion, measures unfused prefill workspace and queue latency, and budgets hybrid fixed state separately. Does not promise four-way batching from the flag."
+    },
+    {
+      "id": 12,
+      "should_trigger": true,
+      "prompt": "My Mac's GPU stats are blank and wired_limit is 0. Can I call it FIT with --others-gib 1 while the other model stays running?",
+      "expected_output": "Treats missing GPU stats as unknown and the default-cap percentage as provisional. Preserves observed GPU use independently of others, requests or measures sourced limits, and refuses a definitive fit claim from incomplete data."
+    },
+    {
+      "id": 13,
+      "should_trigger": true,
+      "prompt": "This speculative setting has 85% acceptance and emits 8 tokens per SSE chunk. Prompt tokens / TTFT is 9000 tok/s. Ship it?",
+      "expected_output": "Separates client TTFT and chunk cadence from server prefill and true token latency, measures net request latency and output tokens, checks sampling semantics and quality, and withholds a speedup claim until comparable repeated runs pass."
+    },
+    {
+      "id": 14,
+      "should_trigger": true,
+      "prompt": "Q4 is faster than Q8 on my Mac but breaks a tool-call JSON test; the benchmark otherwise has three successful requests and one timeout.",
+      "expected_output": "Treats the quality failure as a failed adoption gate, reports the timeout and raw sample count, avoids a trustworthy p99 claim from a few samples, and retains the known-good configuration."
     }
   ]
 }
