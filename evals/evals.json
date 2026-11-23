@@ -51,9 +51,9 @@
     },
     {
       "id": 9,
-      "should_trigger": false,
+      "should_trigger": true,
       "prompt": "write a fused int4 dequant + GEMV Metal kernel using M5 TensorOps and prove the speedup",
-      "expected_output": "Does not own it: custom Metal/TensorOps kernels and speedup proofs route to the kernel/A-B skill."
+      "expected_output": "Profiles the actual GGML/MLX dispatch, validates M=1 and shape tails against a reference, checks feature-gated TensorOps and fallback, then requires controlled end-to-end decode evidence."
     },
     {
       "id": 10,
@@ -84,6 +84,30 @@
       "should_trigger": true,
       "prompt": "Q4 is faster than Q8 on my Mac but breaks a tool-call JSON test; the benchmark otherwise has three successful requests and one timeout.",
       "expected_output": "Treats the quality failure as a failed adoption gate, reports the timeout and raw sample count, avoids a trustworthy p99 claim from a few samples, and retains the known-good configuration."
+    },
+    {
+      "id": 15,
+      "should_trigger": true,
+      "prompt": "Can we run prefill on the ANE and decode on Metal on my Mac or iPad?",
+      "expected_output": "Requires a convertible Core ML partition, target-device planning and runtime placement, copies and state, numerical parity and whole-request A/B. Separates ANE from GPU TensorOps."
+    },
+    {
+      "id": 16,
+      "should_trigger": true,
+      "prompt": "Hill climb this GGUF server under a 42 GiB process cap for four users at 32K.",
+      "expected_output": "Budgets fit, estimates ceilings, configures host and PID guard, runs flanking controls, confirms actual token counts, slot concurrency, exact retrieval and concurrent soak."
+    },
+    {
+      "id": 17,
+      "should_trigger": true,
+      "prompt": "Audit every opportunity to speed up prompt processing and generation in my MLX Mac server.",
+      "expected_output": "Maps both call paths, inventories every opportunity category with evidence, bounds possible gains and ranks experiments, including Metal kernels and Core ML placement."
+    },
+    {
+      "id": 18,
+      "should_trigger": true,
+      "prompt": "Package the fastest MLX configuration so another Mac can reproduce it.",
+      "expected_output": "Pins model, tokenizer, engine and kernel, gates the clean build, compares against the winner and distinguishes measured results from estimates."
     }
   ]
 }

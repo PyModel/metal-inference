@@ -12,6 +12,8 @@ For an assumed bandwidth-limited configuration, use `BW_eff / bytes_read_per_emi
 
 Apple's [M5 MLX study](https://machinelearning.apple.com/research/exploring-llms-mlx-m5) compared 4096-token prompts and 128 generated tokens on specific M4/M5 systems. It found larger TTFT gains than decode gains and documents the GPU Neural Accelerators' use through Metal tensor operations. Treat its numbers as results for that workload, not promises for other chips, models or context lengths. GPU Neural Accelerators and the separate Apple Neural Engine are different execution paths; verify which backend the installed runtime actually uses.
 
+For eligible Core ML workloads, compare placement, conversion, state and complete request time against the shipping Metal baseline using [the ANE playbook](metal-ane.md).
+
 ## GPU residency and working-set budgets
 
 CPU and GPU use the same physical memory pool, with access governed by Metal resource storage mode. Count shared buffers once in the RAM budget; check GPU residency separately. See Apple's [storage-mode documentation](https://developer.apple.com/documentation/metal/choosing-a-resource-storage-mode-for-apple-gpus.md).

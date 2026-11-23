@@ -1,0 +1,7 @@
+{
+  "bandwidth_gbs": 100, "peak_tflops": 10, "mfu": 0.5,
+  "dense_gb": 0.9, "lm_head_gb": 0.1,
+  "active_params_b": 2, "attn_layers": 16, "attn_heads": 16, "head_dim": 128,
+  "kv_bytes_per_token": 65536,
+  "contexts": [0, 4096, 32768], "concurrency": [1, 4]
+}

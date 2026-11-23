@@ -1,0 +1,17 @@
+# Estimate the attainable rate
+
+Use the same Mac, power mode, engine precision, context and concurrency as the workload. Run the installed MLX Python on `scripts/calibrate.py` to measure synchronized device-to-device copy and FP16 matrix multiply. Change `--matrix` to compare 4096³ with 8192³. Check that the copy exceeds the device cache. The reported GB/s counts read **and** write traffic. A streaming read or quantized matvec at the real shape is a closer calibration for decode. Record bytes counted, working set and units. If MLX is unavailable, use synchronized Metal blit/GEMM timings or label the chip spec as an upper bound. Neither GPU calibration measures the ANE.
+
+Copy [the example](../examples/ceiling.json) and replace its **illustrative** values. Run `python3 scripts/ceiling.py your-model.json`. All weight/traffic fields ending in `_gb` use decimal GB, capacity budgets in `fit.py` use GiB.
+
+| Metric | Model and assumptions |
+|---|---|
+| Dense c1 decode | GB per step = dense weight traffic + LM head + KV read at working context + recurrent-state read/write. Count the head once even when tied. Inspect actual quantized tensor bytes including scales. Treat an embedding lookup as one row. |
+| MoE cN decode | Weights may be reused across N rows in one batched step. Expected fraction of routed expert weights touched ≈ 1 − (1 − top_k / n_experts) ^ rows, assuming independent uniform routing. Count router/shared experts in dense bytes. Measure expert overlap and actual simultaneous execution. |
+| Speculation | With k draft tokens, rows = (k+1) × N. Count target verify bytes once, N contexts of KV, draft backbone and draft head per draft step. Set `kv_per_verify_row` true for engines rereading KV each row, and `state_traffic_gb` to per-sequence state traffic per verify step. Include draft KV/verification overhead in measured step costs. |
+| Aggregate decode | Aggregate tok/s ≈ bandwidth_GB/s × N × emitted_tokens_per_stream_per_step / total_GB_per_step. The `accept` field includes the target/bonus token. Example with 1 GB shared weights, 100 GB/s, four streams, negligible KV gives 400 aggregate tok/s. With another 1 GB of KV per stream it drops to 80. Also cap by compute as batch grows. |
+| Prefill | FLOPs/token ≈ 2 × active linear params + 4 × full-attention layers × query heads × head_dim × mean attended length (L/2 for causal full attention from empty KV) + model-specific terms. Adjust for cached prefixes, windows and SSM. Practical rate ≈ measured peak FLOP/s × utilization / FLOPs per token. The example uses 0.5 as a hypothesis. Calibrate on representative kernels and shapes. |
+| TTFT / startup | Short cold TTFT includes tokenization, scheduling, prefill and first sample. Estimate prefill time at the actual length, add measured overhead. Startup includes storage/page-cache reads, allocation, model initialization and first-use compilation. Separate launch-to-ready from first completed inference on lazy-loading servers. |
+| KV capacity | Use actual KV-bearing layers and measured cache dtype/block overhead. Full streams ≤ floor((usable bytes − resident weights − runtime − shared caches) / (KV bytes per stream + recurrent state per stream)). Verify admission, swap and retrieval with every stream live. |
+
+Write inputs, source, measured/estimated status and units in THEORY.md. Compare observed/estimated ceiling only for matching conditions. A result above the estimate calls for checking batching, cache reuse, actual bytes, tokenizer counts and your bandwidth convention.

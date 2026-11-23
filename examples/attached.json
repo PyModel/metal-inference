@@ -1,0 +1,10 @@
+{
+  "name": "attached-baseline",
+  "base_url": "http://127.0.0.1:8080",
+  "model": "replace-with-id-from-v1-models",
+  "host_cap_gib": 24,
+  "concurrency": 1,
+  "max_tokens": 128,
+  "prefill_lengths": [4096],
+  "reps": 6
+}

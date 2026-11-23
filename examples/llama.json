@@ -1,0 +1,9 @@
+{
+  "name": "llama-control",
+  "base_url": "http://127.0.0.1:8081",
+  "model": "bench",
+  "launch": ["llama-server", "-m", "/absolute/path/to/model.gguf", "--alias", "bench", "--host", "127.0.0.1", "--port", "8081", "-c", "8192", "-np", "2"],
+  "host_cap_gib": 24,
+  "concurrency": 2,
+  "prefill_lengths": [2048]
+}

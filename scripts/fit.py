@@ -58,8 +58,9 @@ def sysctl(name):
         return None
 
 
-def vm_bytes():
-    out = subprocess.check_output(["vm_stat"], text=True, timeout=PROBE_TIMEOUT)
+def vm_bytes(out=None):
+    if out is None:
+        out = subprocess.check_output(["vm_stat"], text=True, timeout=PROBE_TIMEOUT)
     page_match = re.search(r"page size of (\d+) bytes", out)
     if not page_match or int(page_match.group(1)) <= 0:
         raise ValueError("vm_stat page size missing or invalid")

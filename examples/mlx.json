@@ -1,0 +1,9 @@
+{
+  "name": "mlx-control",
+  "base_url": "http://127.0.0.1:8081",
+  "model": "/absolute/path/to/model",
+  "launch": ["/absolute/path/to/env/bin/python", "-m", "mlx_lm.server", "--model", "/absolute/path/to/model", "--host", "127.0.0.1", "--port", "8081"],
+  "host_cap_gib": 24,
+  "concurrency": 2,
+  "prefill_lengths": [2048]
+}

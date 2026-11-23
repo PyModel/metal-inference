@@ -1,19 +1,25 @@
 ---
 name: metal-inference
-description: Fit, select, configure, serve, and triage local LLMs on Apple Silicon (Metal, MLX/mlx-lm, llama.cpp/GGUF, vLLM-Metal). Use when deciding whether a model/quant/context fits unified memory, choosing a quant or engine, picking context length or concurrency, writing launch/serve commands, or diagnosing a slow, swapping, or OOM-ing local model on a Mac.
+description: >
+  Fit, serve, profile and optimize local AI models on Apple Silicon. Use for Mac unified-memory
+  budgets, MLX/mlx-lm, GGUF/llama.cpp, speculative decoding, KV cache, prefill, decode tok/s,
+  TTFT, concurrency, speed ceilings, Metal/MSL kernels, M5 TensorOps and Core ML Neural Engine
+  (ANE) placement on Mac or target Apple devices. Audit performance opportunities, benchmark
+  alternatives under memory and quality constraints, and qualify a reproducible configuration.
 ---
 
 # Metal inference
 
-Treat every request as a **unified-memory budget** problem: weights, KV/state cache, runtime transients, other processes, and macOS share one pool. "The file fits" answers nothing; the budget equation answers it.
+## Choose the route
 
-## Route first
-
-If a more specific skill is installed for the runtime in use (a particular server or engine) or for kernel-level optimization and paired A/B benchmarking, hand off to it. This skill owns fit, quant/engine/context choice, launch commands, and triage. Custom Metal/MSL or TensorOps kernels, roofline-driven kernel work and speedup claims are out of scope here.
+- **Fit, select, launch or triage.** Use the short procedure below. Treat weights, KV/state, transients, other processes and macOS as one unified-memory budget.
+- **Audit, tune or compare.** Run the fit check, then follow the optimization loop below. Own both prefill and decode through the engine, Metal dispatch and end-to-end measurement. Use an installed runtime-specific skill for its engine controls where helpful.
+- **Metal kernels or ANE.** Start from a shipping GPU baseline. Identify the phase, operation, shape and limiting resource. For ANE candidates, compare Core ML compute policies and distinguish planned from observed device placement.
+- **Another agent or harness.** Give it the [standalone optimization prompt](PROMPT.md). The [design map](references/adoption-map.md) traces the upstream workflow to this skill.
 
 ## References
 
-Read the file for any area the task touches, before step 4:
+Load the references for the selected route.
 
 | Task touches | Read |
 |---|---|
@@ -22,6 +28,10 @@ Read the file for any area the task touches, before step 4:
 | KV/state size by architecture, MoE resident vs active, GGUF quant families | [references/architectures.md](references/architectures.md) |
 | Slow requests, benchmark design, cache/speculation trade-offs, quality gates | [references/measurement.md](references/measurement.md) |
 | A version-sensitive feature, flag, hardware claim, or external recommendation | [references/sources.md](references/sources.md), then the installed binary's help/source |
+| Measured bandwidth, compute, aggregate decode math, MoE/speculative ceilings | [references/ceilings.md](references/ceilings.md) |
+| Opportunity discovery by phase and engine, historical lever evidence | [Apple opportunity inventory](references/apple-opportunities.md), [field notes](references/field-notes.md) |
+| A/B harness, Mac caps, controls, plateau, qualification and publishing | [references/experiments.md](references/experiments.md) |
+| MLX or GGML Metal kernels, TensorOps, Core ML partitioning or ANE placement | [references/metal-ane.md](references/metal-ane.md) |
 
 ## Procedure
 
@@ -51,6 +61,15 @@ Walk in order: arm64 native → intended GPU/offload configuration actually acti
 
 Quality regressions: compare against a higher-precision reference with identical prompt, chat template (from tokenizer metadata, never hand-written), sampler, and stop tokens; check template, EOS, tokenizer, and rope config before blaming the quant.
 
+## Optimization loop
+
+1. Record the objective, quality tolerance, target context and concurrency, memory cap and scope. Preserve the initial environment and launch. Use a writable experiment directory for PLAN.md, THEORY.md, configs/ and ledger.jsonl.
+2. Measure the baseline and calculate practical ceilings. Use the installed MLX Python with `scripts/calibrate.py` for synchronized GPU copy/GEMM, then `python3 scripts/ceiling.py model.json`. Attribute each ceiling input to a measurement, model tensor or stated assumption.
+3. Inventory opportunities for startup, prefill, decode at short/long context, KV/state, concurrency, Metal and ANE. Trace real dispatch and shape before proposing custom code. For each candidate log evidence, time share, predicted bound, cost, risk and falsifier. Rank candidates against the user's target.
+4. Change one lever in the current best config. Run `python3 "$S/scripts/bench.py" run configs/a.json configs/b.json configs/a.json` from the experiment directory with S set to the absolute skill directory. Follow the experiment guide for native launch, attached mode and watchdog semantics. Keep raw samples, failures and reasons. A faster kernel alone does not establish a faster model.
+5. Require a candidate to beat both controls beyond measured noise while protecting secondary metrics (default 3% regression limit). Repeat surprising results. Gate the provisional winner on exact half/full-context needles, concurrent soak at N, output parity or agreed quality tests and peak memory. Check actual scheduler occupancy.
+6. After three consecutive levers inside noise, record a plateau with remaining opportunities and their cost. Store best-config.json only for a qualified winner. For a distributable recipe, rebuild from pins and re-run the feature and performance gates on that build.
+
 ## Measurement rules
 
 - Use the metric definitions and pass/fail gates in measurement.md. Missing usage, truncated streams, invalid output, and timeouts are failed/inconclusive runs, never zero-cost successes.
@@ -60,4 +79,6 @@ Quality regressions: compare against a higher-precision reference with identical
 
 ## Report
 
-Machine/workload contract · budget and unknowns · bottleneck evidence · hypothesis/change/rollback · recommendation + runner-up · raw measurement and quality results · source/version record · falsifier and its result if run.
+For tuning, lead with the metric, baseline, qualified winner, practical ceiling and measurement method. Include the limiting evidence, raw results, remaining ranked opportunities, rejected changes, rollback, exact configs, verification gaps and final machine state.
+
+For fit or triage, give the machine and workload, budget and unknowns, dominant constraint, recommendation and runner-up, reproducible commands, source versions and the measurement that would change the result.
