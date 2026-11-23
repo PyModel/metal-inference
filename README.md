@@ -20,6 +20,17 @@ Ask your agent to “Use metal-inference to find what limits prefill and decode 
 
 ## Run locally
 
+Try the experiment planner without loading a model:
+
+```sh
+python3 scripts/rank.py examples/critical-path.json
+```
+
+The example predicts 10 ms saved by replacing a prefill GEMM, 4 ms by fusing
+decode dispatches, and **2 ms lost** by moving a projection to the ANE once
+handoff costs are included. Replace these illustrative timings with a trace
+from your workload, then [benchmark the candidate against controls](references/experiments.md#control-ledger-and-decision-record).
+
 From the skill directory:
 
 ```sh
@@ -38,4 +49,7 @@ The envelope reports host memory, GPU allocation, active engines and ports. Use 
 | Verify version-specific engine behavior | [Checked sources and runtime versions](references/sources.md) |
 | Check the fit and benchmark tools | `scripts/fit.py --self-test` and `python3 -B -m unittest discover -s tests` |
 
-The [design map](references/adoption-map.md) records how the upstream inference-optimisation workflow was adopted. Adapted materials retain the [upstream MIT notice](LICENSE-inference-optimisation).
+## License
+
+[MIT](LICENSE) · © 2026 PyModel LLC. The [design map](references/adoption-map.md)
+identifies adapted materials covered by the [upstream MIT notice](LICENSE-inference-optimisation).

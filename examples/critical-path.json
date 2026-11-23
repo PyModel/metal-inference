@@ -1,0 +1,8 @@
+{
+  "request_ms": 100,
+  "candidates": [
+    {"name": "Fuse two decode dispatches", "critical_path_ms": 8, "replacement_ms": 4, "handoff_ms": 0},
+    {"name": "Replace prefill GEMM", "critical_path_ms": 40, "replacement_ms": 30, "handoff_ms": 0},
+    {"name": "Move projection to ANE", "critical_path_ms": 12, "replacement_ms": 5, "handoff_ms": 9}
+  ]
+}

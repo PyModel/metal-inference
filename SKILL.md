@@ -82,6 +82,18 @@ Quality regressions: compare against a higher-precision reference with identical
 
 ## Optimization loop
 
+When the request is “make it faster,” choose the next experiment from evidence.
+Take one representative request for the target metric. Identify the non-overlapping
+wall time a candidate can actually remove: queued GPU work may overlap CPU work,
+and a faster partition can add transfers or synchronization. Populate a copy of
+[the critical-path example](examples/critical-path.json) with those stage times,
+an estimated replacement time and any new handoff cost. Run
+`python3 "$S/scripts/rank.py" profile.json`. Each row predicts latency saved on
+that request, not additive savings or a measured speedup. Test the highest credible
+positive row first. If the estimate is too close to noise, or the dispatch is
+unknown, collect a discriminating trace before changing code. Record predicted
+versus observed savings; if they disagree, revisit overlap and dispatch selection.
+
 1. Record the objective, quality tolerance, target context and concurrency, memory cap and scope. Preserve the initial environment and launch. Use a writable experiment directory for PLAN.md, THEORY.md, configs/ and ledger.jsonl.
 2. Measure the baseline and calculate practical ceilings. Use the installed MLX Python with `scripts/calibrate.py` for synchronized GPU copy/GEMM, then `python3 scripts/ceiling.py model.json`. Attribute each ceiling input to a measurement, model tensor or stated assumption.
 3. Inventory opportunities for startup, prefill, decode at short/long context, KV/state, concurrency, Metal and ANE. Trace real dispatch and shape before proposing custom code. For each candidate log evidence, time share, predicted bound, cost, risk and falsifier. Rank candidates against the user's target.
