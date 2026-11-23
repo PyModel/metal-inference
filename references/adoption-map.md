@@ -2,6 +2,11 @@
 
 The source is the [Sybil Solutions skill at fda968e](https://github.com/sybil-solutions/inference-optimisation-skill/tree/fda968e7fc1996aa23c67139c755fe541c9d4be0). The original MIT notice ships in [LICENSE-inference-optimisation](../LICENSE-inference-optimisation).
 
+The follow-up at `d1f4e1a` contributes the [startup probe](../scripts/probe_binary.py),
+[A/A noise analysis](../scripts/aa.py), listener and run identity, separate first-visible
+latency, and [metric-specific qualification](../scripts/qualify.py). All run locally
+from this skill; no second checkout is required.
+
 The upstream design links each decision to evidence. A workload target determines the baseline and ceiling. The gap between them determines which phase to profile. A candidate advances only after controlled measurements and a quality check. The Mac version inserts two decisions into that sequence: whether the workload fits unified memory at the target concurrency, and whether Metal or a Core ML partition actually executes the expensive operation. A qualified configuration, rejected experiments and ranked open opportunities are the outputs.
 
 | Upstream component | Adopted behavior | Apple implementation |

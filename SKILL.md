@@ -35,6 +35,11 @@ Load the references for the selected route.
 
 ## Autonomous tuning and resumption
 
+From the isolated trial directory, run `python3 "$S/scripts/probe_binary.py" /path/to/engine`
+where `S` is the absolute skill directory. A startup pass is not a serving pass.
+For tuning, follow the [control and qualification commands](references/experiments.md#control-ledger-and-decision-record).
+Use native generation timings for decode; the streaming harness reports end-to-end output rate.
+
 Use the named engine and installed pack, one request at a time, existing sampler and representative token lengths from local history. Record lengths without copying private prompts. When history is unavailable use a short and a long synthetic fixture within the supported context. Preserve capability. Report cold prefill, warm-prefix TTFT and decode independently. Ask only when the decision materially affects the outcome or capability.
 
 In the experiment notes record each question, its answer and the decision it settles. Reuse that answer on resume. “Proceed” resumes authorized steps. Reopen a question only when new evidence changes the next action. Apply the target repository's build/load gate before any guarded command, including calibration. For a block save the action, clearing evidence, independent work completed, working directory and exact next command. Finish dependency inspection, preserve baseline files, prepare fixtures and validate CPU-only launch paths once. Claim queued work only with an actual runner ID.

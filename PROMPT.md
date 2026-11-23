@@ -15,3 +15,8 @@ Give the following task to an agent with shell access to the target Mac. Supply 
 > **A5 — Qualify and hand back.** Test exact needles near half and full context, concurrent near-full requests, deterministic parity or a labelled quality evaluation, supported chat/tools/reasoning/vision, and sustained memory/thermal behavior. Pin and rebuild a winner before distributing a recipe. Start the report with metric, baseline, winner, practical ceiling and measurement method. Include ranked remaining opportunities, rejections with evidence, reproducible commands, ledger/config paths, what was unverified and final machine state. Publish only when requested.
 
 For a fit question, use the short budget/triage route in SKILL.md. For an analysis-only request, deliver the opportunity table and proposed measurements within the authorized scope.
+
+For executed trials, separate engine decode timing from end-to-end output rate and
+first reasoning output from first visible text. Measure the metric's noise floor on
+ten unchanged controls. Qualify it on two independent A/B/A triplets with retained
+run IDs; a faster repeat-turn TTFT does not qualify a decode change.

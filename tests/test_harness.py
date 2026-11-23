@@ -54,9 +54,10 @@ class StreamTests(unittest.TestCase):
             {"choices": [{"delta": {"content": "multi-token chunk"}}]},
             {"usage": {"prompt_tokens": 10, "completion_tokens": 7, "prompt_tokens_details": {"cached_tokens": 2}}},
         ]
-        with self.stream(events), patch("workload.time.monotonic", side_effect=[0, 1, 3]):
+        with self.stream(events), patch("workload.time.monotonic", side_effect=[0, 1, 2, 3]):
             r = workload.chat(self.cfg, "hi", 8)
-        self.assertEqual((r["ttft_s"], r["decode_tps"], r["cached_tokens"], r["answer"]), (1, 3, 2, "multi-token chunk"))
+        self.assertEqual((r["ttft_s"], r["visible_ttft_s"], r["output_tps"], r["cached_tokens"], r["answer"]), (1, 2, 7/3, 2, "multi-token chunk"))
+        self.assertNotIn("decode_tps", r)
 
     def test_invalid_stream_is_never_a_speed_result(self):
         delta = {"choices": [{"delta": {"content": "answer"}}]}

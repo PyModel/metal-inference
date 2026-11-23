@@ -35,7 +35,7 @@ def chat(cfg, prompt, limit):
     req = urllib.request.Request(cfg["base_url"] + "/v1/chat/completions", data=json.dumps(body).encode(),
                                  headers={"Content-Type": "application/json"})
     start = time.monotonic()
-    first = None
+    first = visible = None
     pieces = []
     answer = []
     usage = {}
@@ -59,6 +59,8 @@ def chat(cfg, prompt, limit):
                 if piece:
                     if first is None:
                         first = time.monotonic()
+                    if content and visible is None:
+                        visible = time.monotonic()
                     pieces.append(piece)
                     answer.append(content)
     end = time.monotonic()
@@ -71,7 +73,8 @@ def chat(cfg, prompt, limit):
         raise ValueError("looping output")
     return {"start": start, "end": end, "ttft_s": first - start, "prompt_tokens": counts[0],
             "completion_tokens": counts[1], "cached_tokens": (usage.get("prompt_tokens_details") or {}).get("cached_tokens"),
-            "decode_tps": (counts[1] - 1) / (end - first) if len(pieces) > 1 and counts[1] > 1 else None,
+            "visible_ttft_s": visible - start if visible is not None else None,
+            "output_tps": counts[1] / (end - start),
             "answer": "".join(answer), "output_sha256": hashlib.sha256("".join(pieces).encode()).hexdigest()}
 
 
@@ -95,16 +98,10 @@ def context_run(cfg, target, seed, qualification, barrier=None):
     r = chat(cfg, prompt, reserve)
     result = {"target": target, "prompt_tokens": r["prompt_tokens"], "ttft_s": r["ttft_s"],
               "cached_tokens": r["cached_tokens"], "prompt_tokens_per_ttft_s": r["prompt_tokens"] / r["ttft_s"]}
+    result["length_ok"] = 0.95 * prompt_budget <= r["prompt_tokens"] <= prompt_budget
     if qualification:
         result["exact"] = r["answer"].strip().split() == codes
-        result["length_ok"] = 0.95 * prompt_budget <= r["prompt_tokens"] <= prompt_budget
     return result
-
-
-def decode(r):
-    if r["decode_tps"] is None:
-        raise ValueError("decode requires multiple tokens and multiple output events")
-    return r["decode_tps"]
 
 
 def measure(cfg):
@@ -114,10 +111,11 @@ def measure(cfg):
     samples = []
     for i in range(cfg.get("reps", 6)):
         r = chat(cfg, PROMPTS[i % len(PROMPTS)], limit)
-        samples.append({k: r[k] for k in ("completion_tokens", "prompt_tokens", "ttft_s", "cached_tokens", "output_sha256")})
-        samples[-1]["decode_tps"] = decode(r)
+        if not r["answer"].strip():
+            raise ValueError("no visible benchmark answer")
+        samples.append({k: r[k] for k in ("completion_tokens", "prompt_tokens", "ttft_s", "visible_ttft_s", "cached_tokens", "output_sha256", "output_tps")})
     out = {"ttft_short_s": short["ttft_s"], "c1": samples,
-           "c1_decode_tps": statistics.median(x["decode_tps"] for x in samples)}
+           "c1_output_tps": statistics.median(x["output_tps"] for x in samples)}
     if n > 1:
         prompts = [f"Task {i + 1}. {CONCURRENT_PROMPTS[i % len(CONCURRENT_PROMPTS)]}" for i in range(n)]
         with ThreadPoolExecutor(n) as pool:
@@ -127,7 +125,7 @@ def measure(cfg):
         out["aggregate_tps"] = sum(r["completion_tokens"] for r in rs) / wall
         out["aggregate_wall_s"] = wall
         out["streams"] = [{k: r[k] for k in ("prompt_tokens", "completion_tokens", "ttft_s", "cached_tokens")}
-                          | {"decode_tps": decode(r)} for r in rs]
+                          | {"output_tps": r["output_tps"], "visible_ttft_s": r["visible_ttft_s"]} for r in rs]
     out["prefill"] = [context_run(cfg, size, size, False) for size in cfg.get("prefill_lengths", [])]
     if "qualify_context" in cfg:
         size = cfg["qualify_context"]

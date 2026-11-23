@@ -12,7 +12,10 @@ class Qualification(unittest.TestCase):
             ("lower", [1, .7, 1.01], True),
             ("higher", [100, 101, 101], False),
         ):
-            row = {"aba": samples, "checks_passed": True}
-            self.assertEqual(qualifies([row, row], direction), expected)
-            self.assertFalse(qualifies([row], direction))
-            self.assertFalse(qualifies([row, dict(row, checks_passed=False)], direction))
+            rows = [dict(aba=samples, checks_passed=True, run_ids=list(ids))
+                    for ids in ("abc", "def")]
+            record = dict(metric="target", trials=rows, direction=direction, noise_pct=3)
+            self.assertEqual(qualifies(record), expected)
+            self.assertFalse(qualifies(dict(record, trials=rows[:1])))
+            rows[1]["checks_passed"] = False
+            self.assertFalse(qualifies(record))

@@ -7,6 +7,7 @@ import math
 import multiprocessing
 from pathlib import Path
 import signal
+import uuid
 import subprocess
 import time
 import urllib.error
@@ -68,7 +69,7 @@ def ready(cfg):
 
 
 def run(path):
-    row = {"config": Path(path).name, "time": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "ok": False}
+    row = {"run_id": uuid.uuid4().hex, "config": Path(path).name, "time": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "ok": False, "qualification": "not established"}
     proc = client = receive = send = None
     try:
         raw = Path(path).read_bytes()
@@ -130,6 +131,8 @@ def run(path):
             row["startup_to_models_s"] = time.monotonic() - start
         else:
             ready(cfg)
+        row["listener_pid"] = pid
+        row["listener_executable"] = guard.output("ps", "-p", str(pid), "-o", "comm=").strip()
         ctx = multiprocessing.get_context("spawn")
         receive, send = ctx.Pipe(duplex=False)
         client = ctx.Process(target=worker, args=(cfg, send))
@@ -142,6 +145,10 @@ def run(path):
                 raise RuntimeError("workload timed out or exited without metrics")
         row.update(receive.recv())
         check()
+        if listeners(addr.port) != {pid}:
+            raise RuntimeError("listener identity changed")
+        if any(not r["length_ok"] for r in row.get("prefill", [])):
+            raise ValueError("prefill length outside target; calibrate words_per_token")
         if any(not (r["length_ok"] and r["exact"]) for k in ("needles", "soak") for r in row.get(k, [])):
             row["error"] = "retrieval or measured context length failed"
         row["ok"] = "error" not in row
@@ -176,10 +183,10 @@ def main():
     commands.add_parser("show", help="summarize the local ledger")
     args = parser.parse_args()
     if args.command == "show":
-        print("run\tvalid\tdecode tok/s\taggregate tok/s\terror")
+        print("run\tvalid\tend-to-end output tok/s\taggregate tok/s\terror")
         for line in Path("ledger.jsonl").read_text().splitlines():
             r = json.loads(line)
-            print(r.get("name", r["config"]), r["ok"], r.get("c1_decode_tps", "-"),
+            print(r.get("name", r.get("config", "?")), r["ok"], r.get("c1_output_tps", "-"),
                   r.get("aggregate_tps", "-"), r.get("error", r.get("cleanup_error", "-")), sep="\t")
         return
     def cancelled(signum, frame):
